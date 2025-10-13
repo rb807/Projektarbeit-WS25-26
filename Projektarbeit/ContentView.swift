@@ -8,14 +8,47 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @StateObject private var motionManager = MotionManager()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            HStack {
+                Text("Dashboard")
+                    .font(.largeTitle)
+                    .bold()
+                    .padding()
+                Spacer()
+            }
+            
+            VStack {
+                GroupBox {
+                    Text("Samples: \(motionManager.motionData.count)")
+                }
+                
+                HStack {
+                    Button("Start") {
+                        motionManager.startMotionCapture()
+                    }
+                        .buttonStyle(.borderedProminent)
+                    Button("Stop") {
+                        motionManager.stopMotionCapture()
+                    }
+                        .buttonStyle(.bordered)
+                    Button("export") {
+                        motionManager.exportToCsv()
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+            .padding()
         }
-        .padding()
+    }
+}
+
+struct valueView: View {
+    var body: some View {
+        
     }
 }
 
