@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B252C5E52E9E2FAA00BA746D /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B252C5E02E9E2FAA00BA746D /* README.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		B2C244D72E99580100F771F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B252C5E02E9E2FAA00BA746D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B2C244C92E99580000F771F8 /* Projektarbeit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Projektarbeit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2C244D62E99580100F771F8 /* ProjektarbeitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProjektarbeitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2C244E02E99580100F771F8 /* ProjektarbeitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProjektarbeitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,6 +84,7 @@
 				B2C244D92E99580100F771F8 /* ProjektarbeitTests */,
 				B2C244E32E99580100F771F8 /* ProjektarbeitUITests */,
 				B2C244CA2E99580000F771F8 /* Products */,
+				B252C5E02E9E2FAA00BA746D /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B252C5E52E9E2FAA00BA746D /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
