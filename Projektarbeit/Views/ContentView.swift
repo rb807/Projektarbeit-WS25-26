@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     
     @StateObject private var motionManager = MotionManager()
+    @State private var viewModel = ViewModel()
     
     var body: some View {
         NavigationStack {
@@ -22,6 +23,10 @@ struct ContentView: View {
             }
             
             VStack {
+                CameraView(image: $viewModel.currentFrame)
+            }
+            
+            VStack {
                 GroupBox {
                     Text("Samples: \(motionManager.motionData.count)")
                 }
@@ -29,14 +34,17 @@ struct ContentView: View {
                 HStack {
                     Button("Start") {
                         motionManager.startMotionCapture()
+                        viewModel.cameraManager.startRecording()
                     }
                         .buttonStyle(.borderedProminent)
                     Button("Stop") {
                         motionManager.stopMotionCapture()
+                        viewModel.cameraManager.stopRecording()
                     }
                         .buttonStyle(.bordered)
                     Button("export") {
                         motionManager.exportToCsv()
+                        viewModel.cameraManager.saveRecording()
                     }
                     .buttonStyle(.borderedProminent)
                 }

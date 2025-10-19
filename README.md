@@ -23,6 +23,7 @@ Projektmeetings voraussichtlich immer Freitags um 13:30 Uhr in der Westhochschul
     - Core Motion gibt die CMMotionManager() Klasse nutzen um die verschiedenen Sensoren zu starten und auszulesen
     - CMDeviceMotion() gibt Beschleunigungsdaten des Nutzers, Lage-, Rotations- und Magnetfelddaten sowie die Stellung des iPhones
     - Um and die komplett unverarbeiteten Daten zu kommen lassen sich auch alle Sensoren einzeln auslesen
+    - Die Timestamps der Daten beziehen sich jedoch auf die vergangene Zeit seit dem letzten boot des iPhones nicht wann die messungen gemacht wurden
 - Wie sehen die Daten aus?
     - Beschleunigungsmesser gibt Daten in der form 1.0 : 9.8/ms entlang der x,y,z Achsen des iPhones
     - Gyroskop gibt Daten in der form 1.0 : 9.8/ms um die x,y,z Achsen des iPhones
@@ -40,5 +41,5 @@ Projektmeetings voraussichtlich immer Freitags um 13:30 Uhr in der Westhochschul
         - Erste Idee Daten als strings in einer .csv Datei speichern
 - Wie nehme ich Videos auf?
 - Wie komme ich an Sensordaten der Kamera/Gibt es überhaupt Sensordaten?
-- Wie Synchron kann die Kamera
+- Wie Synchron kann die Kamera mit den Messwerten aufnehmen?
 - Wie füge ich die gesammelten Daten in Kalibr ein?
