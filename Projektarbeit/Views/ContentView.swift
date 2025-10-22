@@ -15,7 +15,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             HStack {
-                Text("Dashboard")
+                Text("IMU-Datenerfassung")
                     .font(.largeTitle)
                     .bold()
                     .padding()
@@ -28,7 +28,7 @@ struct ContentView: View {
             
             VStack {
                 GroupBox {
-                    Text("Samples: \(motionManager.motionData.count)")
+                    Text("Number of samples: \(motionManager.motionData.count)")
                 }
                 
                 HStack {

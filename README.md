@@ -1,6 +1,6 @@
 # Projektarbeit WS-25/36
 
-## ## Entwicklung einer iPhone-App zur Aufzeichnung von Kamera- und Sensordaten
+## Entwicklung einer iPhone-App zur Aufzeichnung von Kamera- und Sensordaten
 
 ### Beschreibung
 
@@ -10,7 +10,17 @@ Im weiteren Umfeld des Projekts soll im Rahmen dieser Projektarbeit eine iOS-App
 
 Projektmeetings voraussichtlich immer Freitags um 13:30 Uhr in der Westhochschule, etwa zweiwöchiger Rhythmus. Kick-Off am 10.10.2025
 
+### Implementierte Features 
+
+- [x] Aufnahme von Sensordaten (Beschleunigungsdaten des Nutzers, Lage-, Rotations-, Magnetfelddaten usw.)
+- [x] Speichern von Sensordaten in einer .csv Datei
+- [x] Live video feed 
+
 ### Roadmap
+
+- [ ] Video Aufnahme
+- [ ] GPS Daten sammeln
+- [ ] Synchronität sichern
 
 - Welche Sensoren stehen zur Verfügung?
     - Beschleunigungsmesser 
