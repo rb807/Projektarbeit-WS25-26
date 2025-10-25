@@ -34,6 +34,8 @@ Westhochschule, etwa zweiwöchiger Rhythmus. Kick-Off am 10.10.2025
 - [ ] GPS Daten sammeln
 - [ ] Synchronität sichern
 
+--- 
+
 ## Installation
 
 1. **Projekt in Xcode öffnen**  
@@ -69,8 +71,6 @@ auf dem **Xcode installiert** ist.
 Erst danach erscheint die Option _Entwicklermodus_ unter  
 `Einstellungen > Datenschutz & Sicherheit`.
 
----
-
 ### iPhone wird in Xcode nicht als Gerät erkannt
 
 - Stelle sicher, dass das iPhone **angeschlossen und entsperrt** ist.  
@@ -78,8 +78,6 @@ Erst danach erscheint die Option _Entwicklermodus_ unter
   unter `Einstellungen > Allgemein > Übertragungen oder Zurücksetzen > Vertrauen
   diesem Computer`  
   dem Mac vertraut wurde.
-
----
 
 ### Kabelloses Debugging (optional)
 
