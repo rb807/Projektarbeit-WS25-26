@@ -1,37 +1,28 @@
 //
-//  Camera.swift
-//  Projektarbeit
+//  File.swift
+//  cameraTesting
 //
-//  Created by Ryan Babcock on 17.10.25.
-//
-//  Based on this project: https://github.com/create-with-swift/Camera-capture-setup-in-SwiftUI
-//  And this tutorial: https://www.createwithswift.com/camera-capture-setup-in-a-swiftui-app/
+//  Created by Ryan Babcock on 21.10.25.
 //
 
+import Foundation
 import AVFoundation
-import CoreImage
+import Combine
 
+class CameraManager: NSObject, ObservableObject{
 
-class CameraManager: NSObject {
+    private let captureSession: AVCaptureSession = AVCaptureSession()
+    private let sessionQueue = DispatchSerialQueue(label: "video.preview.session")
+    let movieOutput = AVCaptureMovieFileOutput()
+    @Published var isRunning = false
     
-    private let captureSession = AVCaptureSession()
-    private var deviceInput: AVCaptureDeviceInput?
-    private var videoOutput: AVCaptureVideoDataOutput?
-    private let systemPreferredCamera = AVCaptureDevice.default(for: .video)
-
-    private var sessionQueue = DispatchQueue(label: "video.preview.session")
+    var captureSessionIfReady: AVCaptureSession? {
+        guard captureSession.isRunning else { return nil }
+        return captureSession
+    }
     
-    private var addToPreviewStream: ((CGImage) -> Void)?
-    
-    lazy var previewStream: AsyncStream<CGImage> = {
-        AsyncStream { continuation in
-            addToPreviewStream = { cgImage in
-                continuation.yield(cgImage)
-            }
-        }
-    }()
-    
-    private var isAuthorized: Bool {
+    // determines if user has given acces to the camera
+    var isAuthorized: Bool {
         get async {
             let status = AVCaptureDevice.authorizationStatus(for: .video)
             
@@ -48,100 +39,65 @@ class CameraManager: NSObject {
         }
     }
     
-    override init() {
-        super.init()
-        
-        Task {
-            await configureSession()
-            await startSession()
-        }
-        
-    }
-    
-    private func configureSession() async {
-        guard await isAuthorized,
-              let systemPreferredCamera,
-              let deviceInput = try? AVCaptureDeviceInput(device: systemPreferredCamera)
-        else { return }
-        
-        captureSession.beginConfiguration()
-        
-        defer {
-            self.captureSession.commitConfiguration()
-        }
-        
-        let videoOutput = AVCaptureVideoDataOutput()
-       
-        videoOutput.setSampleBufferDelegate(self, queue: sessionQueue)
-        
-        guard captureSession.canAddInput(deviceInput) else {
-            return
-        }
-        
-        guard captureSession.canAddOutput(videoOutput) else {
-            return
-        }
-        
-        captureSession.addInput(deviceInput)
-        captureSession.addOutput(videoOutput)
-
-        //For a vertical orientation of the camera stream
-        videoOutput.connection(with: .video)?.videoRotationAngle = 90
-    }
-    
-    
-    private func startSession() async {
+    func setUpCaptureSession() async {
         guard await isAuthorized else { return }
         sessionQueue.async {
+            self.configureCaptureSession()
             self.captureSession.startRunning()
         }
     }
     
-    private func rotate(by angle: CGFloat, from connection: AVCaptureConnection) {
-        guard connection.isVideoRotationAngleSupported(angle) else { return }
-        connection.videoRotationAngle = angle
+    private func configureCaptureSession() {
+        sessionQueue.async {
+            self.captureSession.beginConfiguration()
+            
+            // Video
+            if let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+               let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
+               self.captureSession.canAddInput(videoInput) {
+                self.captureSession.addInput(videoInput)
+            }
+            
+            // Audio
+            if let audioDevice = AVCaptureDevice.default(for: .audio),
+               let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
+               self.captureSession.canAddInput(audioInput) {
+                self.captureSession.addInput(audioInput)
+            }
+            
+            // Movie output
+            if self.captureSession.canAddOutput(self.movieOutput) {
+                self.captureSession.addOutput(self.movieOutput)
+            }
+            
+            self.captureSession.sessionPreset = .high
+            self.captureSession.commitConfiguration()
+        }
+    }
+    
+    private func startCaptureSession() {
+        sessionQueue.async {
+            self.captureSession.startRunning()
+            self.isRunning = true
+        }
     }
     
     func startRecording() {
-        
+        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("video.mov")
+        movieOutput.startRecording(to: outputURL, recordingDelegate: self)
     }
-    
+
     func stopRecording() {
-        
-    }
-    
-    func saveRecording() {
-        
-    }
-
-}
-
-extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
-    
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard let currentFrame = sampleBuffer.cgImage else {
-            print("Can't translate to CGImage")
-            return
-        }
-        addToPreviewStream?(currentFrame)
-    }
-    
-}
-
-
-extension CMSampleBuffer {
-    var cgImage: CGImage? {
-        let pixelBuffer: CVPixelBuffer? = CMSampleBufferGetImageBuffer(self)
-        guard let imagePixelBuffer = pixelBuffer else { return nil }
-        return CIImage(cvPixelBuffer: imagePixelBuffer).cgImage
+        movieOutput.stopRecording()
     }
 }
 
-extension CIImage {
-    var cgImage: CGImage? {
-        let ciContext = CIContext()
-        guard let cgImage = ciContext.createCGImage(self, from: self.extent) else { return nil }
-        return cgImage
+// Defines where the stream of data from the capture session is stored
+extension CameraManager: AVCaptureFileOutputRecordingDelegate {
+    func fileOutput(_ output: AVCaptureFileOutput,
+                    didFinishRecordingTo outputFileURL: URL,
+                    from connections: [AVCaptureConnection],
+                    error: Error?) {
+        print("Video saved to: \(outputFileURL.path)")
     }
 }
-

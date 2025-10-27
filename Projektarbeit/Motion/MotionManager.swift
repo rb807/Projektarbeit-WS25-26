@@ -7,7 +7,7 @@
 
 import Foundation
 import CoreMotion
-internal import Combine
+import Combine
 
 class MotionManager: ObservableObject {
     let motionManager = CMMotionManager() // Initializes the CMMotionManager which is used to start the various motion sensors
