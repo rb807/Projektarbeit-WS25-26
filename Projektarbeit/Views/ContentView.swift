@@ -10,10 +10,10 @@ import SwiftUI
 struct ContentView: View {
     
     @StateObject private var motionManager = MotionManager()
-    @State private var viewModel = ViewModel()
-    
+    @StateObject private var cameraManager = CameraManager()
+
     var body: some View {
-        NavigationStack {
+        VStack {
             HStack {
                 Text("IMU-Datenerfassung")
                     .font(.largeTitle)
@@ -22,29 +22,40 @@ struct ContentView: View {
                 Spacer()
             }
             
-            VStack {
-                CameraView(image: $viewModel.currentFrame)
+            ZStack {
+                if let session = cameraManager.captureSessionIfReady {
+                    CameraPreview(session: session)
+                } else {
+                    ProgressView("Kamera wird initialisiert …")
+                        .onAppear {
+                            Task {
+                                await cameraManager.setUpCaptureSession()
+                            }
+                        }
+                }
             }
             
             VStack {
+                
                 GroupBox {
                     Text("Number of samples: \(motionManager.motionData.count)")
                 }
+    
                 
                 HStack {
                     Button("Start") {
                         motionManager.startMotionCapture()
-                        viewModel.cameraManager.startRecording()
+                        cameraManager.startRecording()
                     }
                         .buttonStyle(.borderedProminent)
                     Button("Stop") {
                         motionManager.stopMotionCapture()
-                        viewModel.cameraManager.stopRecording()
+                        cameraManager.stopRecording()
                     }
                         .buttonStyle(.bordered)
-                    Button("export") {
+                    Button("Save") {
                         motionManager.exportToCsv()
-                        viewModel.cameraManager.saveRecording()
+                     
                     }
                     .buttonStyle(.borderedProminent)
                 }
