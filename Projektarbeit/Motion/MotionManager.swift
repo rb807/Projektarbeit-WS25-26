@@ -53,6 +53,7 @@ class MotionManager: ObservableObject {
         } else {
             print("Motion capture not active.")
         }
+        exportToCsv()
     }
     
     // Itterates over captured motion data turning the measurements into strings and writing thme to a csv file in the apps document folder

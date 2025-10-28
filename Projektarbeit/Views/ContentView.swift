@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreMotion
 
 struct ContentView: View {
     
@@ -27,47 +28,34 @@ struct ContentView: View {
                     CameraPreview(session: session)
                 } else {
                     ProgressView("Kamera wird initialisiert …")
-                        .onAppear {
-                            Task {
-                                await cameraManager.setUpCaptureSession()
-                            }
-                        }
+                }
+            }
+            .onAppear {
+                Task {
+                    await cameraManager.setUpCaptureSession()
                 }
             }
             
             VStack {
-                
-                GroupBox {
-                    Text("Number of samples: \(motionManager.motionData.count)")
-                }
-    
+                motionView(motionManager: motionManager)
                 
                 HStack {
                     Button("Start") {
                         motionManager.startMotionCapture()
-                        cameraManager.startRecording()
+                        //cameraManager.startRecording()
                     }
                         .buttonStyle(.borderedProminent)
+                        .padding()
                     Button("Stop") {
                         motionManager.stopMotionCapture()
-                        cameraManager.stopRecording()
+                        //cameraManager.stopRecording()
                     }
                         .buttonStyle(.bordered)
-                    Button("Save") {
-                        motionManager.exportToCsv()
-                     
-                    }
-                    .buttonStyle(.borderedProminent)
+                        .padding()
                 }
             }
             .padding()
         }
-    }
-}
-
-struct valueView: View {
-    var body: some View {
-        
     }
 }
 
