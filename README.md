@@ -18,19 +18,16 @@ Tools, das mithilfe der vorhandenen Hardware (iPhone und MacBook) konsistente
 und qualitativ hochwertige Datensätze liefert. So entsteht eine praxisnahe
 Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
 
-Projektmeetings voraussichtlich immer Freitags um 13:30 Uhr in der
-Westhochschule, etwa zweiwöchiger Rhythmus. Kick-Off am 10.10.2025
-
 ### Implementierte Features
 
 - [x] Aufnahme von Sensordaten (Beschleunigungsdaten des Nutzers, Lage-,
   Rotations-, Magnetfelddaten usw.)
 - [x] Speichern von Sensordaten in einer .csv Datei
 - [x] Live video feed
-
+- [x] Video Aufnahme
+ 
 ### Roadmap
 
-- [ ] Video Aufnahme
 - [ ] GPS Daten sammeln
 - [ ] Synchronität sichern
 
