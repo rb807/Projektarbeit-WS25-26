@@ -28,8 +28,11 @@ Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
  
 ### Roadmap
 
+- [ ] Sensordaten Zeitstempel hinzufügen
+- [ ] Zeit Anzeige in UI View
 - [ ] GPS Daten sammeln
 - [ ] Synchronität sichern
+- [ ] Kalibrieung mit Kalibr
 
 --- 
 
