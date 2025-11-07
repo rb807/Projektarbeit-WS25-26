@@ -32,7 +32,7 @@ class MotionManager: ObservableObject {
                         DispatchQueue.main.async {
                             self.motionData.append(capturedData)
                         }
-                        self.motionData.last?.printMeasurements() // Prints the measurements to console for debug purposes
+                        // self.motionData.last?.printMeasurements() // Prints the measurements to console for debug purposes
                     }
                 })
                 print("Started device motion capture.")
@@ -50,10 +50,10 @@ class MotionManager: ObservableObject {
         if motionManager.isDeviceMotionActive {
             motionManager.stopDeviceMotionUpdates()
             print("Stopped device motion capture.")
+            exportToCsv() // saves data to a .csv file after stopping measurements
         } else {
             print("Motion capture not active.")
         }
-        exportToCsv()
     }
     
     // Itterates over captured motion data turning the measurements into strings and writing thme to a csv file in the apps document folder

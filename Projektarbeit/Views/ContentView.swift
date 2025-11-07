@@ -41,17 +41,28 @@ struct ContentView: View {
                 
                 HStack {
                     Button("Start") {
-                        motionManager.startMotionCapture()
-                        //cameraManager.startRecording()
+                        Task {
+                            await withTaskGroup(of: Void.self) { group in
+                                group.addTask { await motionManager.startMotionCapture() }
+                                group.addTask { await cameraManager.startRecording() }
+                            }
+                        }
                     }
                         .buttonStyle(.borderedProminent)
                         .padding()
+                        .disabled(!cameraManager.isRunning)
+                    
                     Button("Stop") {
-                        motionManager.stopMotionCapture()
-                        //cameraManager.stopRecording()
+                        Task {
+                            await withTaskGroup(of: Void.self) { group in
+                                group.addTask { await motionManager.stopMotionCapture() }
+                                group.addTask { await cameraManager.stopRecording() }
+                            }
+                        }
                     }
                         .buttonStyle(.bordered)
                         .padding()
+                    
                 }
             }
             .padding()
