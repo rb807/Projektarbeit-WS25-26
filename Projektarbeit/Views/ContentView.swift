@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import CoreMotion
 
 struct ContentView: View {
     
     @StateObject private var motionManager = MotionManager()
     @StateObject private var cameraManager = CameraManager()
+    @StateObject private var locationManager = LocationManager()
 
     var body: some View {
         VStack {
@@ -27,47 +29,71 @@ struct ContentView: View {
                     CameraPreview(session: session)
                 } else {
                     ProgressView("Kamera wird initialisiert …")
-                        .onAppear {
-                            Task {
-                                await cameraManager.setUpCaptureSession()
-                            }
-                        }
                 }
             }
-            
-            VStack {
-                
-                GroupBox {
-                    Text("Number of samples: \(motionManager.motionData.count)")
+            .onAppear {
+                Task {
+                    await cameraManager.setUpCaptureSession()
                 }
-    
-                
+            }
+             
+            VStack {
+                if let location = locationManager.userLocation {
+                    LocationDetailsView(location: location)
+                } else {
+                    Text("Fetching location...")
+                        .padding()
+                }
                 HStack {
-                    Button("Start") {
-                        motionManager.startMotionCapture()
-                        cameraManager.startRecording()
-                    }
-                        .buttonStyle(.borderedProminent)
-                    Button("Stop") {
-                        motionManager.stopMotionCapture()
-                        cameraManager.stopRecording()
-                    }
-                        .buttonStyle(.bordered)
-                    Button("Save") {
-                        motionManager.exportToCsv()
-                     
+                    Button ("Start location") {
+                        locationManager.startTracking()
                     }
                     .buttonStyle(.borderedProminent)
+                    .padding()
+                    Button ("Stop location") {
+                        locationManager.stopTracking()
+                    }
+                    .buttonStyle(.bordered)
+                    .padding()
                 }
             }
             .padding()
+            .onAppear {
+                locationManager.setUpLocationManager()
+            }
+            
+            VStack {
+                motionView(motionManager: motionManager)
+                
+                HStack {
+                    Button("Start") {
+                        Task {
+                            await withTaskGroup(of: Void.self) { group in
+                                group.addTask { await motionManager.startMotionCapture() }
+                                group.addTask { await cameraManager.startRecording() }
+                            }
+                        }
+                    }
+                        .buttonStyle(.borderedProminent)
+                        .padding()
+                        .disabled(!cameraManager.isRunning)
+                    
+                    Button("Stop") {
+                        Task {
+                            await withTaskGroup(of: Void.self) { group in
+                                group.addTask { await motionManager.stopMotionCapture() }
+                                group.addTask { await cameraManager.stopRecording() }
+                            }
+                        }
+                    }
+                        .buttonStyle(.bordered)
+                        .padding()
+                    
+                }
+            }
+            .padding()
+             
         }
-    }
-}
-
-struct valueView: View {
-    var body: some View {
-        
     }
 }
 

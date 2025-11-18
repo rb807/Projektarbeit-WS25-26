@@ -43,52 +43,56 @@ class CameraManager: NSObject, ObservableObject{
         guard await isAuthorized else { return }
         sessionQueue.async {
             self.configureCaptureSession()
-            self.captureSession.startRunning()
+            self.startCaptureSession()
         }
     }
     
     private func configureCaptureSession() {
-        sessionQueue.async {
-            self.captureSession.beginConfiguration()
-            
-            // Video
-            if let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-               let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
-               self.captureSession.canAddInput(videoInput) {
-                self.captureSession.addInput(videoInput)
-            }
-            
-            // Audio
-            if let audioDevice = AVCaptureDevice.default(for: .audio),
-               let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
-               self.captureSession.canAddInput(audioInput) {
-                self.captureSession.addInput(audioInput)
-            }
-            
-            // Movie output
-            if self.captureSession.canAddOutput(self.movieOutput) {
-                self.captureSession.addOutput(self.movieOutput)
-            }
-            
-            self.captureSession.sessionPreset = .high
-            self.captureSession.commitConfiguration()
+        self.captureSession.beginConfiguration()
+        
+        // Video
+        if let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+           let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
+           self.captureSession.canAddInput(videoInput) {
+            self.captureSession.addInput(videoInput)
         }
+        
+        // Audio
+        if let audioDevice = AVCaptureDevice.default(for: .audio),
+           let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
+           self.captureSession.canAddInput(audioInput) {
+            self.captureSession.addInput(audioInput)
+        }
+        
+        // Movie output
+        if self.captureSession.canAddOutput(self.movieOutput) {
+            self.captureSession.addOutput(self.movieOutput)
+        }
+        
+        self.captureSession.sessionPreset = .high
+        self.captureSession.commitConfiguration()
+
     }
     
+    
     private func startCaptureSession() {
-        sessionQueue.async {
-            self.captureSession.startRunning()
+        self.captureSession.startRunning()
+     
+        DispatchSerialQueue.main.async {
             self.isRunning = true
         }
     }
     
+    
     func startRecording() {
         let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("video.mov")
         movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+        NSLog("Started recording")
     }
 
     func stopRecording() {
         movieOutput.stopRecording()
+        NSLog("Stopped recording")
     }
 }
 
@@ -98,6 +102,6 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                     didFinishRecordingTo outputFileURL: URL,
                     from connections: [AVCaptureConnection],
                     error: Error?) {
-        print("Video saved to: \(outputFileURL.path)")
+        NSLog("Video saved to \(outputFileURL.path)")
     }
 }

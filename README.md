@@ -4,12 +4,8 @@
 
 ### Beschreibung
 
-In unserem Forschungsprojekt "Neuronale 3D-Repräsentation für dynamische Szenen
-mit passiven Multi-Kamera Systemen" (NeRDy) wird zusammen mit der Arbeitsgruppe
-RobotVision unter Prof. Niklas Zeller zusammen gearbeitet.
-
-Im weiteren Umfeld des Projekts soll im Rahmen dieser Projektarbeit eine iOS-App
-entwickelt werden, die Kamera- sowie Sensordaten eines Smartphones synchron
+Im Rahmen dieser Projektarbeit soll eine iOS-App entwickelt werden, die Kamera- sowie 
+Sensordaten eines Smartphones synchron
 erfasst und speichert. Dabei werden insbesondere IMU-Daten (Accelerometer,
 Gyroskop, Magnetometer) sowie GPS-Daten aufgezeichnet, um sie für Anwendungen im
 Bereich _Simultaneous Localization and Mapping (SLAM)_ sowie _Structure from
@@ -20,19 +16,20 @@ Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
 
 ### Implementierte Features
 
-- [x] Aufnahme von Sensordaten (Beschleunigungsdaten des Nutzers, Lage-,
+- [x] Auslesen der Sensordaten (Beschleunigungs-, Lage-,
   Rotations-, Magnetfelddaten usw.)
-- [x] Speichern von Sensordaten in einer .csv Datei
+- [x] Speichern von Sensordaten
 - [x] Live video feed
-- [x] Video Aufnahme
- 
+- [X] Video Aufnahme
+- [X] Gleichzeitiges aufnehemen von Sensordaten und Video
+- [X] Standort Daten auslesen
+
 ### Roadmap
 
-- [ ] Sensordaten Zeitstempel hinzufügen
-- [ ] Zeit Anzeige in UI View
-- [ ] GPS Daten sammeln
-- [ ] Synchronität sichern
-- [ ] Kalibrieung mit Kalibr
+- [ ] Speichern von Standort Daten
+- [ ] Speichern von Daten während der Aufnahme
+- [ ] Gleichzeitiges aufnehemen von Sensor- und Standort Daten und Video
+- [ ] Synchronität der Aufnahmen überprüfen mit kalibr
 
 --- 
 

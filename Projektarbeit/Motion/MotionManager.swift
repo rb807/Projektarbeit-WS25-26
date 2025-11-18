@@ -21,7 +21,7 @@ class MotionManager: ObservableObject {
                 
                 motionData.removeAll() // removes all of our previous measurements from the array
                 
-                self.motionManager.deviceMotionUpdateInterval = 0.5 // Defines how often the sensor data is measured currently twice a second
+                self.motionManager.deviceMotionUpdateInterval = 1/30 // Defines how often the sensor data is measured currently twice a second
                 self.motionManager.showsDeviceMovementDisplay = true
                 
                 self.motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: self.queue, withHandler: { (data, error) in
@@ -32,7 +32,7 @@ class MotionManager: ObservableObject {
                         DispatchQueue.main.async {
                             self.motionData.append(capturedData)
                         }
-                        self.motionData.last?.printMeasurements() // Prints the measurements to console for debug purposes
+                        // self.motionData.last?.printMeasurements() // Prints the measurements to console for debug purposes
                     }
                 })
                 print("Started device motion capture.")
@@ -50,6 +50,7 @@ class MotionManager: ObservableObject {
         if motionManager.isDeviceMotionActive {
             motionManager.stopDeviceMotionUpdates()
             print("Stopped device motion capture.")
+            exportToCsv() // saves data to a .csv file after stopping measurements
         } else {
             print("Motion capture not active.")
         }
