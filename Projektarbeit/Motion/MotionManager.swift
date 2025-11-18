@@ -21,7 +21,7 @@ class MotionManager: ObservableObject {
                 
                 motionData.removeAll() // removes all of our previous measurements from the array
                 
-                self.motionManager.deviceMotionUpdateInterval = 0.5 // Defines how often the sensor data is measured currently twice a second
+                self.motionManager.deviceMotionUpdateInterval = 1/30 // Defines how often the sensor data is measured currently twice a second
                 self.motionManager.showsDeviceMovementDisplay = true
                 
                 self.motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: self.queue, withHandler: { (data, error) in

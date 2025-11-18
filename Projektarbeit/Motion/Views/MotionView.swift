@@ -13,6 +13,15 @@ struct motionView: View {
     @ObservedObject var motionManager: MotionManager
     
     var body: some View {
+        List {
+            Section(header: Text("Acceleration")) {
+                Text("Samples: \(motionManager.motionData.count)")
+                Text("x = \(((motionManager.motionData.last?.userAccelerationData.x ?? 0.0) * 9.8).formatted()) m/s")
+                Text("y = \(((motionManager.motionData.last?.userAccelerationData.y ?? 0.0) * 9.8).formatted()) m/s")
+                Text("z = \(((motionManager.motionData.last?.userAccelerationData.z ?? 0.0) * 9.8).formatted()) m/s")
+            }
+        }
+        /*
         GroupBox {
             Text("Samples: \(motionManager.motionData.count)")
             Text("Acceleration: ")
@@ -20,5 +29,6 @@ struct motionView: View {
             Text("y = \(((motionManager.motionData.last?.userAccelerationData.y ?? 0.0) * 9.8).formatted()) m/s")
             Text("z = \(((motionManager.motionData.last?.userAccelerationData.z ?? 0.0) * 9.8).formatted()) m/s")
         }
+        */
     }
 }
