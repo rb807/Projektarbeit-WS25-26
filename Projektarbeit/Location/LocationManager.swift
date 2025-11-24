@@ -15,6 +15,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     @Published var userLocation: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus?
+    @Published var samples: Int = 0
     
     func setUpLocationManager() {
         manager.delegate = self
@@ -26,6 +27,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Updates user location to last given location
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         userLocation = locations.last
+        samples = samples + 1
     }
      
     // Delegate function for when User changes authorization
@@ -38,32 +40,17 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     // Starts location updates if the user has given permission
-    func startTracking() {
+    func startUpdates() {
         if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
             manager.startUpdatingLocation()
-        }
-    }
-    
-    func startLiveUpdates() {
-        Task {
-            let updates = CLLocationUpdate.liveUpdates()
-            for try await update in updates {
-                 if update.location != nil {
-                      // Process the location.
-                     userLocation = update.location
-                 } else if update.authorizationDenied {
-                     // Process the authorization denied state change.
-                     return
-                 } else {
-                     // Process other state changes.
-                 }
-            }
+            print("Started updating location")
         }
     }
     
     // Stops location updates
-    func stopTracking() {
+    func stopUpdates() {
         manager.stopUpdatingLocation()
+        print("Stopped updating location")
     }
     
     func saveData() {

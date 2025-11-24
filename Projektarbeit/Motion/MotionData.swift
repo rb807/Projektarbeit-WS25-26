@@ -15,8 +15,8 @@ import CoreMotion
 ///     - attitudeData: attitude data of the device (yaw, pitch, roll)
 ///     - userAccelerationData: acceleration imparted on the device by the user
 ///     - gyroscopicData: acceleration of the device around its axis
-///     - timestamp: exceeded time since last device boot
-///     
+///     - timestamp: time interval  since last device boot
+///
 struct MotionData: Identifiable {
     let id = UUID()
     let attitudeData: CMAttitude

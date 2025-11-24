@@ -36,7 +36,7 @@ struct ContentView: View {
                     await cameraManager.setUpCaptureSession()
                 }
             }
-             
+            /*
             VStack {
                 if let location = locationManager.userLocation {
                     LocationDetailsView(location: location)
@@ -46,12 +46,12 @@ struct ContentView: View {
                 }
                 HStack {
                     Button ("Start location") {
-                        locationManager.startTracking()
+                        locationManager.startUpdates()
                     }
                     .buttonStyle(.borderedProminent)
                     .padding()
                     Button ("Stop location") {
-                        locationManager.stopTracking()
+                        locationManager.stopUpdates()
                     }
                     .buttonStyle(.bordered)
                     .padding()
@@ -61,9 +61,9 @@ struct ContentView: View {
             .onAppear {
                 locationManager.setUpLocationManager()
             }
-            
+            */
             VStack {
-                motionView(motionManager: motionManager)
+                SampleView(motionManager: motionManager, locationManager: locationManager)
                 
                 HStack {
                     Button("Start") {
@@ -71,6 +71,7 @@ struct ContentView: View {
                             await withTaskGroup(of: Void.self) { group in
                                 group.addTask { await motionManager.startMotionCapture() }
                                 group.addTask { await cameraManager.startRecording() }
+                                group.addTask { await locationManager.startUpdates() }
                             }
                         }
                     }
@@ -83,6 +84,7 @@ struct ContentView: View {
                             await withTaskGroup(of: Void.self) { group in
                                 group.addTask { await motionManager.stopMotionCapture() }
                                 group.addTask { await cameraManager.stopRecording() }
+                                group.addTask { await locationManager.stopUpdates() }
                             }
                         }
                     }
@@ -90,6 +92,9 @@ struct ContentView: View {
                         .padding()
                     
                 }
+            }
+            .onAppear {
+                locationManager.setUpLocationManager()
             }
             .padding()
              
