@@ -1,5 +1,5 @@
 //
-//  FileManagerView.swift
+//  FileView.swift
 //  Projektarbeit
 //
 //  Created by Ryan Babcock on 24.11.25.

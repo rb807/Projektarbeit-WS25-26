@@ -23,12 +23,14 @@ Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
 - [X] Video Aufnahme
 - [X] Gleichzeitiges aufnehemen von Sensordaten und Video
 - [X] Standort Daten auslesen
+- [X] Speichern von Standort Daten
+- [X] Speichern von Daten während der Aufnahme
+- [X] Gleichzeitiges aufnehemen von Sensor- und Standort Daten und Video
 
 ### Roadmap
 
-- [ ] Speichern von Standort Daten
-- [ ] Speichern von Daten während der Aufnahme
-- [ ] Gleichzeitiges aufnehemen von Sensor- und Standort Daten und Video
+- [ ] Ansicht aller Aufnahmen innerhalb der App
+- [ ] Exportieren der Files vom internen App File System in das File System des iPhones
 - [ ] Synchronität der Aufnahmen überprüfen mit kalibr
 
 --- 

@@ -36,35 +36,9 @@ struct ContentView: View {
                     await cameraManager.setUpCaptureSession()
                 }
             }
-            /*
-            VStack {
-                if let location = locationManager.userLocation {
-                    LocationDetailsView(location: location)
-                } else {
-                    Text("Fetching location...")
-                        .padding()
-                }
-                HStack {
-                    Button ("Start location") {
-                        locationManager.startUpdates()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding()
-                    Button ("Stop location") {
-                        locationManager.stopUpdates()
-                    }
-                    .buttonStyle(.bordered)
-                    .padding()
-                }
-            }
-            .padding()
-            .onAppear {
-                locationManager.setUpLocationManager()
-            }
-            */
+
             VStack {
                 SampleView(motionManager: motionManager, locationManager: locationManager)
-                
                 HStack {
                     Button("Start") {
                         Task {
@@ -90,11 +64,7 @@ struct ContentView: View {
                     }
                         .buttonStyle(.bordered)
                         .padding()
-                    
                 }
-            }
-            .onAppear {
-                locationManager.setUpLocationManager()
             }
             .padding()
              

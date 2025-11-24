@@ -39,7 +39,7 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
-    func setUpCaptureSession() async {
+    func setUpCaptureSession() async -> Void {
         guard await isAuthorized else { return }
         sessionQueue.async {
             self.configureCaptureSession()
@@ -47,7 +47,7 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
-    private func configureCaptureSession() {
+    private func configureCaptureSession() -> Void {
         self.captureSession.beginConfiguration()
         
         // Video
@@ -75,7 +75,7 @@ class CameraManager: NSObject, ObservableObject{
     }
     
     
-    private func startCaptureSession() {
+    private func startCaptureSession() -> Void {
         self.captureSession.startRunning()
      
         DispatchSerialQueue.main.async {
@@ -84,15 +84,28 @@ class CameraManager: NSObject, ObservableObject{
     }
     
     
-    func startRecording() {
-        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("video.mov")
-        movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+    func startRecording() -> Void {
+        let fileName = generateFilename()
+        let outputUrl = URL.documentsDirectory.appendingPathComponent(fileName)
+        movieOutput.startRecording(to: outputUrl, recordingDelegate: self)
         NSLog("Started recording")
     }
 
-    func stopRecording() {
+    func stopRecording() -> Void {
+        if !movieOutput.isRecording {
+            NSLog("Recording is not running.")
+            return
+        }
         movieOutput.stopRecording()
         NSLog("Stopped recording")
+    }
+    
+    /// Generates a filename based on the current date and time when the collection started.
+    func generateFilename() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let timestamp = formatter.string(from: Date())
+        return "movie_\(timestamp).mov"
     }
 }
 

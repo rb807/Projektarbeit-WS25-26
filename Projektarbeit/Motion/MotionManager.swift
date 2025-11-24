@@ -12,7 +12,6 @@ import Combine
 /// Manages starting/stopping and storing of IMU-Data collection.
 class MotionManager: ObservableObject {
     let motionManager = CMMotionManager() // Initializes the CMMotionManager which is used to start the various motion sensors
-    // @Published var motionData: [MotionData] = [] // A simple array which takes MotionData objects that store our measurements
     let queue = OperationQueue()
     @Published var samples: Int = 0 // Simple indicator to check if anything is being measured
     
@@ -46,6 +45,7 @@ class MotionManager: ObservableObject {
             return
         }
         
+        NSLog("Started motion capture")
         self.motionManager.deviceMotionUpdateInterval = 1/30 // Defines how often the sensor data is updated (1/30 = 30hz)
         self.motionManager.showsDeviceMovementDisplay = true
         
@@ -64,35 +64,6 @@ class MotionManager: ObservableObject {
                 }
             }
         })
-        /*
-        if motionManager.isDeviceMotionAvailable {
-            if !motionManager.isDeviceMotionActive {
-                
-                motionData.removeAll()
-                
-                self.motionManager.deviceMotionUpdateInterval = 1/30 // Defines how often the sensor data is updated (1/30 = 30hz)
-                self.motionManager.showsDeviceMovementDisplay = true
-                
-                self.motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: self.queue, withHandler: { (data, error) in
-                    // unpack to check that data is not nil
-                    if let validData = data {
-                        // Create new Motion Data struct with new data
-                        let capturedData = MotionData(attitudeData: validData.attitude, userAccelerationData: validData.userAcceleration, gyroscopicData: validData.rotationRate, timestamp: validData.timestamp)
-                        // push collected data from queue to main thread and add to motionData array
-                        DispatchQueue.main.async {
-                            self.motionData.append(capturedData)
-                        }
-                    }
-                })
-                print("Started device motion capture.")
-            } else {
-                print("Device motion capture already active.")
-            }
-        } else {
-            print("Device motion is not available.")
-            return
-        }
-         */
     }
     
     /// Stops the ongoing data collection if it is running.
@@ -100,32 +71,12 @@ class MotionManager: ObservableObject {
         if motionManager.isDeviceMotionActive {
             motionManager.stopDeviceMotionUpdates() // Stop new motion updates
             try? fileHandler?.close() // Close the file handler
-            print("Stopped device motion capture.")
-            print("Saved file to: \(currentFileURL?.path ?? "")")
+            NSLog("Stopped device motion capture.")
+            NSLog("Saved file to: \(currentFileURL?.path ?? "")")
         } else {
-            print("Motion capture not active.")
+            NSLog("Motion capture not active.")
         }
     }
-    
-    /*
-    /// Itterates over captured motion data turning the measurements into strings and writing them to a csv file in the apps document folder.
-    func exportToCsv() -> Void {
-        let url = URL.documentsDirectory.appending(path: "measurements.csv")
-        var csvText = "timestamp,yaw,pitch,roll,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"
-        
-        for md in self.motionData {
-            csvText += "\(md.timestamp),\(md.attitudeData.yaw),\(md.attitudeData.pitch),\(md.attitudeData.roll),\(md.userAccelerationData.x),\(md.userAccelerationData.y),\(md.userAccelerationData.z),\(md.gyroscopicData.x),\(md.gyroscopicData.y),\(md.gyroscopicData.z)\n"
-        }
-        
-        do {
-            try csvText.write(to: url, atomically: true, encoding: .utf8)
-            print("CSV file created at \(url.path)")
-        } catch {
-            print("Failed to create file")
-            print("\(error)")
-        }
-    }
-    */
     
     /// Generates a filename based on the current date and time when the collection started.
     func generateFilename() -> String {
