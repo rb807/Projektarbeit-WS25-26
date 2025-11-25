@@ -20,20 +20,7 @@ class MotionManager: ObservableObject {
     
     /// Checks if motion sensors are available and already running.
     /// Sets up the CMMotionManager instance and then starts the collecting of motion data
-    func startMotionCapture() {
-        let filename = generateFilename()
-        let url = URL.documentsDirectory.appendingPathComponent(filename)
-        currentFileURL = url
-        samples = 0
-
-        // Create file and write csv table header
-        let header = "timestamp,yaw,pitch,roll,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"
-        try? header.write(to: url, atomically: true, encoding: .utf8)
-        
-        // Open FileHandle
-        fileHandler = try? FileHandle(forWritingTo: url)
-        fileHandler?.seekToEndOfFile() // sets pointer to end of file
-        
+    func startMotionCapture(path: URL) {
         // Check if motion sensors are available
         if motionManager.isDeviceMotionAvailable == false {
             print("Device motion is not available.")
@@ -44,6 +31,19 @@ class MotionManager: ObservableObject {
             print("Device motion capture already active.")
             return
         }
+        
+        let filename = "IMU-measurements.csv"
+        let url = path.appendingPathComponent(filename)
+        currentFileURL = url
+        samples = 0
+
+        // Create file and write csv table header
+        let header = "timestamp,yaw,pitch,roll,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"
+        try? header.write(to: url, atomically: true, encoding: .utf8)
+        
+        // Open FileHandle
+        fileHandler = try? FileHandle(forWritingTo: url)
+        fileHandler?.seekToEndOfFile() // sets pointer to end of file
         
         NSLog("Started motion capture")
         self.motionManager.deviceMotionUpdateInterval = 1/30 // Defines how often the sensor data is updated (1/30 = 30hz)
@@ -76,13 +76,5 @@ class MotionManager: ObservableObject {
         } else {
             NSLog("Motion capture not active.")
         }
-    }
-    
-    /// Generates a filename based on the current date and time when the collection started.
-    func generateFilename() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let timestamp = formatter.string(from: Date())
-        return "measurements_\(timestamp).csv"
     }
 }

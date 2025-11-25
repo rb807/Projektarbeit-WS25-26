@@ -32,6 +32,7 @@ Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
 - [ ] Ansicht aller Aufnahmen innerhalb der App
 - [ ] Exportieren der Files vom internen App File System in das File System des iPhones
 - [ ] Synchronität der Aufnahmen überprüfen mit kalibr
+- [ ] Zeitanzeige für die Aufnahme
 
 --- 
 

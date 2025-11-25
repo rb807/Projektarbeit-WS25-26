@@ -9,6 +9,7 @@ import Foundation
 import AVFoundation
 import Combine
 
+/// Manages camera setup, recording and saving of videos 
 class CameraManager: NSObject, ObservableObject{
 
     private let captureSession: AVCaptureSession = AVCaptureSession()
@@ -39,6 +40,7 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
+    /// Sets up capture session configuration and starts it
     func setUpCaptureSession() async -> Void {
         guard await isAuthorized else { return }
         sessionQueue.async {
@@ -47,6 +49,7 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
+    /// Configures output and input of the capture session
     private func configureCaptureSession() -> Void {
         self.captureSession.beginConfiguration()
         
@@ -74,7 +77,7 @@ class CameraManager: NSObject, ObservableObject{
 
     }
     
-    
+    /// Starts stream from input to output
     private func startCaptureSession() -> Void {
         self.captureSession.startRunning()
      
@@ -83,14 +86,20 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
-    
-    func startRecording() -> Void {
-        let fileName = generateFilename()
-        let outputUrl = URL.documentsDirectory.appendingPathComponent(fileName)
+    /// Starts video recording if recording is not active
+    func startRecording(path: URL) -> Void {
+        if movieOutput.isRecording {
+            NSLog("Recording is already running.")
+            return
+        }
+        
+        let fileName = "recording.mov"
+        let outputUrl = path.appendingPathComponent(fileName)
         movieOutput.startRecording(to: outputUrl, recordingDelegate: self)
         NSLog("Started recording")
     }
-
+    
+    /// Stops video recording if recording is active
     func stopRecording() -> Void {
         if !movieOutput.isRecording {
             NSLog("Recording is not running.")
@@ -98,14 +107,6 @@ class CameraManager: NSObject, ObservableObject{
         }
         movieOutput.stopRecording()
         NSLog("Stopped recording")
-    }
-    
-    /// Generates a filename based on the current date and time when the collection started.
-    func generateFilename() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let timestamp = formatter.string(from: Date())
-        return "movie_\(timestamp).mov"
     }
 }
 

@@ -9,6 +9,7 @@ import Foundation
 import CoreLocation
 import Combine
 
+/// Manages starting and stopping of location updates
 class LocationManager: ObservableObject {
     
     @Published var authorizationStatus: CLAuthorizationStatus?
@@ -19,22 +20,23 @@ class LocationManager: ObservableObject {
     private var currentFileURL: URL?
     private var updatesTask: Task<Void, Never>? = nil
     
-    func startUpdates() {
-        // Falls bereits läuft nichts machen
+    /// Starts live location updates. Does nothing if they are already active.
+    func startUpdates(path: URL) {
+        // Do nothing if already running
         if let task = updatesTask, !task.isCancelled {
             NSLog("Location updates already running.")
             return
         }
         
         updatesTask = Task {
-            // Obtain an asynchronous stream of updates.
+            // Obtain an asynchronous stream of updates
             let stream = CLLocationUpdate.liveUpdates()
             NSLog("Started live location updates")
-            let filename = generateFilename()
-            let url = URL.documentsDirectory.appendingPathComponent(filename)
+            
+            let filename = "location_data.csv"
+            let url = path.appendingPathComponent(filename)
             currentFileURL = url
-            samples = 0
-
+            
             // Create file and write csv table header
             let header = "timestamp,latitude,longitude,horizontal_accuracy,vertical_accuracy,heading\n"
             try? header.write(to: url, atomically: true, encoding: .utf8)
@@ -42,8 +44,9 @@ class LocationManager: ObservableObject {
             // Open FileHandle
             fileHandler = try? FileHandle(forWritingTo: url)
             fileHandler?.seekToEndOfFile()
-
-            // Iterate over the stream and handle incoming updates.
+            
+            samples = 0
+            // Iterate over the stream and handle incoming updates
             do {
                 for try await update in stream {
                     
@@ -58,6 +61,7 @@ class LocationManager: ObservableObject {
                         
                     } else if update.authorizationDenied {
                         authorizationDenied = true
+                        return
                     }
                 }
             } catch is CancellationError {
@@ -68,6 +72,7 @@ class LocationManager: ObservableObject {
         }
     }
     
+    /// Stops live location updates. Does nothing if they are not active.
     func stopUpdates() -> Void{
         // do nothing if ther are no live updates
         if updatesTask == nil {
@@ -78,18 +83,10 @@ class LocationManager: ObservableObject {
         updatesTask?.cancel()
         updatesTask = nil
         
-        // Datei schließen
+        // Close FileHandle
         try? fileHandler?.close()
         fileHandler = nil
         NSLog("Saved file to: \(currentFileURL?.path ?? "")")
         NSLog("Stopped live location updates.")
-    }
-    
-    /// Generates a filename based on the current date and time when the collection started.
-    func generateFilename() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let timestamp = formatter.string(from: Date())
-        return "location_data_\(timestamp).csv"
     }
 }

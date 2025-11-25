@@ -19,6 +19,7 @@ struct SampleView: View {
                 Text("Samples: \(locationManager.samples)")
             }
         }
+        .listStyle(PlainListStyle())
     }
 }
 
