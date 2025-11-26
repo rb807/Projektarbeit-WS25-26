@@ -9,6 +9,7 @@ import Foundation
 import AVFoundation
 import Combine
 
+/// Manages camera setup, recording and saving of videos 
 class CameraManager: NSObject, ObservableObject{
 
     private let captureSession: AVCaptureSession = AVCaptureSession()
@@ -39,7 +40,8 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
-    func setUpCaptureSession() async {
+    /// Sets up capture session configuration and starts it
+    func setUpCaptureSession() async -> Void {
         guard await isAuthorized else { return }
         sessionQueue.async {
             self.configureCaptureSession()
@@ -47,7 +49,8 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
-    private func configureCaptureSession() {
+    /// Configures output and input of the capture session
+    private func configureCaptureSession() -> Void {
         self.captureSession.beginConfiguration()
         
         // Video
@@ -74,8 +77,8 @@ class CameraManager: NSObject, ObservableObject{
 
     }
     
-    
-    private func startCaptureSession() {
+    /// Starts stream from input to output
+    private func startCaptureSession() -> Void {
         self.captureSession.startRunning()
      
         DispatchSerialQueue.main.async {
@@ -83,14 +86,25 @@ class CameraManager: NSObject, ObservableObject{
         }
     }
     
-    
-    func startRecording() {
-        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("video.mov")
-        movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+    /// Starts video recording if recording is not active
+    func startRecording(path: URL) -> Void {
+        if movieOutput.isRecording {
+            NSLog("Recording is already running.")
+            return
+        }
+        
+        let fileName = "recording.mov"
+        let outputUrl = path.appendingPathComponent(fileName)
+        movieOutput.startRecording(to: outputUrl, recordingDelegate: self)
         NSLog("Started recording")
     }
-
-    func stopRecording() {
+    
+    /// Stops video recording if recording is active
+    func stopRecording() -> Void {
+        if !movieOutput.isRecording {
+            NSLog("Recording is not running.")
+            return
+        }
         movieOutput.stopRecording()
         NSLog("Stopped recording")
     }
