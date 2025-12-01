@@ -29,10 +29,13 @@ struct RecordingView: View {
             }
 
             VStack {
+                
                 SampleView(motionManager: motionManager, locationManager: locationManager)
+                
                 HStack {
-                    Button("Start") {
+                    Button("Start", systemImage: "play.circle") {
                         currentSessionFolder = createFolder()
+                        
                         Task {
                             await withTaskGroup(of: Void.self) { group in
                                 group.addTask { await motionManager.startMotionCapture(path: currentSessionFolder) }
@@ -45,7 +48,7 @@ struct RecordingView: View {
                     .padding()
                     .disabled(!cameraManager.isRunning)
                     
-                    Button("Stop") {
+                    Button("Stop", systemImage: "stop.circle") {
                         Task {
                             await withTaskGroup(of: Void.self) { group in
                                 group.addTask { await motionManager.stopMotionCapture() }
@@ -60,10 +63,10 @@ struct RecordingView: View {
             }
             .padding()
         }
-        .navigationTitle("Datenerfassung")
     }
 }
 
+/// creates a folder for a recording in the documents directory
 func createFolder() -> URL {
     let formatter = DateFormatter()
     formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
