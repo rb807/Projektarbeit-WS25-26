@@ -4,7 +4,7 @@
 //
 //  Created by Ryan Babcock on 24.11.25.
 //
-
+/*
 import SwiftUI
 import Foundation
 import UniformTypeIdentifiers
@@ -110,3 +110,4 @@ struct DirectoryDocument: FileDocument, @unchecked Sendable {
 #Preview {
     FileView()
 }
+*/

@@ -18,7 +18,7 @@ struct ContentView: View {
             .tabItem { Label("Datenerfassung", systemImage: "record.circle") }
             
             NavigationStack {
-                FileView()
+                FilesListView()
                     .navigationTitle("Aufnahmen")
             }
             .tabItem { Label("Aufnahmen", systemImage: "folder") }
