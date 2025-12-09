@@ -60,10 +60,10 @@ class FilesViewModel: ObservableObject {
             let wrapper: FileWrapper
             
             if urls.count == 1, let singleURL = urls.first {
-                // Einzelner Ordner - direkt als FileWrapper
+                // Single Recording
                 wrapper = try FileWrapper(url: singleURL, options: .immediate)
             } else {
-                // Mehrere Ordner - kombiniere sie in einem Parent-Wrapper
+                // Multiple Recordings
                 var fileWrappers: [String: FileWrapper] = [:]
                 
                 for url in urls {
@@ -86,7 +86,6 @@ class FilesViewModel: ObservableObject {
     }
 }
 
-// Simple FileDocument wrapper that avoids Sendable issues
 struct DirectoryDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.folder] }
     
