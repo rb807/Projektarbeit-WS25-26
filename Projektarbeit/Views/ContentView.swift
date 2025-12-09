@@ -13,16 +13,15 @@ struct ContentView: View {
         TabView {
             NavigationStack {
                 RecordingView()
+                    .navigationTitle("Datenerfassung")
             }
-            .tabItem {
-                Label("Datenerfassung", systemImage: "dot.circle.and.cursorarrow")
-                }
+            .tabItem { Label("Datenerfassung", systemImage: "record.circle") }
+            
             NavigationStack {
-                FileView()
+                FilesListView()
+                    .navigationTitle("Aufnahmen")
             }
-            .tabItem {
-                Label("Aufnahmen", systemImage: "folder")
-            }
+            .tabItem { Label("Aufnahmen", systemImage: "folder") }
         }
     }
 }
