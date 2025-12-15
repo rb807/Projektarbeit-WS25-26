@@ -38,7 +38,7 @@ class MotionManager: ObservableObject {
         samples = 0
 
         // Create file and write csv table header
-        let header = "timestamp,yaw,pitch,roll,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"
+        let header = "timestamp,yaw,pitch,roll,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,mag_x,mag_y,mag_z\n"
         try? header.write(to: url, atomically: true, encoding: .utf8)
         
         // Open FileHandle
@@ -49,11 +49,12 @@ class MotionManager: ObservableObject {
         self.motionManager.deviceMotionUpdateInterval = 1/30 // Defines how often the sensor data is updated (1/30 = 30hz)
         self.motionManager.showsDeviceMovementDisplay = true
         
-        self.motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: self.queue, withHandler: { (data, error) in
+        self.motionManager.startDeviceMotionUpdates(using: .xMagneticNorthZVertical, to: self.queue, withHandler: { (data, error) in
             // unpack to check that data is not nil
             if let validData = data {
                 // turn data into a string
-                let line = "\(validData.timestamp),\(validData.attitude.yaw),\(validData.attitude.pitch),\(validData.attitude.roll),\(validData.userAcceleration.x),\(validData.userAcceleration.y),\(validData.userAcceleration.z),\(validData.rotationRate.x),\(validData.rotationRate.y),\(validData.rotationRate.z)\n"
+                
+                let line = "\(validData.timestamp),\(validData.attitude.yaw),\(validData.attitude.pitch),\(validData.attitude.roll),\(validData.userAcceleration.x),\(validData.userAcceleration.y),\(validData.userAcceleration.z),\(validData.rotationRate.x),\(validData.rotationRate.y),\(validData.rotationRate.z),\(validData.magneticField.field.x),\(validData.magneticField.field.y),\(validData.magneticField.field.z)\n"
                 // Write data to file
                 if let fh = self.fileHandler, let data = line.data(using: .utf8) {
                     fh.write(data)
