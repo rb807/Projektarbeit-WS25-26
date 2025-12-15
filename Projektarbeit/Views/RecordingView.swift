@@ -11,6 +11,7 @@ struct RecordingView: View {
     @StateObject private var motionManager = MotionManager()
     @StateObject private var cameraManager = CameraManager()
     @StateObject private var locationManager = LocationManager()
+    @StateObject private var recordingTimer = RecordingTimer()
     @State var currentSessionFolder: URL = URL.documentsDirectory
 
     var body: some View {
@@ -28,13 +29,37 @@ struct RecordingView: View {
                 }
             }
 
-            VStack {
+            VStack(spacing: 20) {
+                // Timer Display
+                TimerView(timer: recordingTimer)
+                    .padding()
                 
-                SampleView(motionManager: motionManager, locationManager: locationManager)
-                
+                // Sample counts
+                /*
+                HStack(spacing: 20) {
+                    VStack {
+                        Text("IMU")
+                            .font(.caption)
+                        Text("\(motionManager.samples)")
+                            .font(.headline)
+                    }
+                    
+                    VStack {
+                        Text("GPS")
+                            .font(.caption)
+                        Text("\(locationManager.samples)")
+                            .font(.headline)
+                    }
+                }
+                .foregroundColor(.secondary)
+                */
                 HStack {
                     Button("Start", systemImage: "play.circle") {
                         currentSessionFolder = createFolder()
+                        // Reset Timer
+                        recordingTimer.reset()
+                        // Start Timer
+                        recordingTimer.start()
                         
                         Task {
                             await withTaskGroup(of: Void.self) { group in
@@ -46,9 +71,12 @@ struct RecordingView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .padding()
-                    .disabled(!cameraManager.isRunning)
+                    .disabled(!cameraManager.isRunning || recordingTimer.isRunning)
                     
                     Button("Stop", systemImage: "stop.circle") {
+                        // Stop Timer
+                        recordingTimer.stop()
+                        
                         Task {
                             await withTaskGroup(of: Void.self) { group in
                                 group.addTask { await motionManager.stopMotionCapture() }
@@ -59,6 +87,7 @@ struct RecordingView: View {
                     }
                     .buttonStyle(.bordered)
                     .padding()
+                    .disabled(!recordingTimer.isRunning)
                 }
             }
             .padding()
