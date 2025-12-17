@@ -28,11 +28,12 @@ Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
 - [X] Gleichzeitiges aufnehemen von Sensor- und Standort Daten und Video
 - [X] Ansicht aller Aufnahmen innerhalb der App
 - [X] Exportieren der Files vom internen App File System in das File System des iPhones
+- [X] Zeitanzeige für die Aufnahme
 
 ### Roadmap
 
 - [ ] Synchronität der Aufnahmen überprüfen mit kalibr
-- [ ] Zeitanzeige für die Aufnahme
+- [ ] Extra File nach der Aufnahme mit Kamera informationen
 
 --- 
 
@@ -41,8 +42,8 @@ Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
 1. **Projekt in Xcode öffnen**  
    Öffne die Projektdatei (`.xcodeproj` oder `.xcworkspace`) in **Xcode**.
 
-2. **iPhone per Kabel verbinden**  
-   Schließe dein iPhone **über ein USB-Kabel** an den Mac an.
+2. **iPhone verbinden**  
+   Schließe dein iPhone **über ein USB-Kabel** an den Mac an oder verbinde den Mac per Hotspot mit dem iPhone.
 
 3. **Entwicklermodus aktivieren**  
    Aktiviere auf dem iPhone den Entwicklermodus unter  
