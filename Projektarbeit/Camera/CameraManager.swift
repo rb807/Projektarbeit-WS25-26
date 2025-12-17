@@ -1,9 +1,8 @@
 //
 //  CameraManager.swift
-//
+//  Projektarbeit
 //
 //  Created by Ryan Babcock on 21.10.25.
-//
 //
 
 import Foundation
