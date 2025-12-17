@@ -8,12 +8,13 @@
 import Foundation
 import CoreLocation
 import Combine
+import os
 
 /// Manages starting and stopping of location updates with high accuracy
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     @Published var authorizationStatus: CLAuthorizationStatus?
-    @Published var samples: Int = 0
+    var samples: Int = 0
     @Published var authorizationDenied: Bool = false
     
     private var fileHandler: FileHandle?
@@ -25,14 +26,14 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         locationManager.delegate = self
         
-        // WICHTIG: Hier kannst du die Accuracy einstellen
+        // Set accuracy or how often location updates are triggered
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         // Alternatives: kCLLocationAccuracyBestForNavigation für höchste Genauigkeit
         
         // Minimum distance (in meters) before location update
-        locationManager.distanceFilter = kCLDistanceFilterNone  // Alle Updates
+        locationManager.distanceFilter = kCLDistanceFilterNone
         
-        // Für Hintergrund-Updates (optional)
+        // For Background-Update
         // locationManager.allowsBackgroundLocationUpdates = true
         // locationManager.pausesLocationUpdatesAutomatically = false
         
@@ -44,7 +45,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func startUpdates(path: URL) {
         // Do nothing if already running
         if isRecording {
-            NSLog("Location updates already running.")
+            AppLogger.location.warning("Location updates already running")
             return
         }
         
@@ -65,24 +66,24 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         // Start location updates
         locationManager.startUpdatingLocation()
-        NSLog("Started location updates with accuracy: \(locationManager.desiredAccuracy)")
+        AppLogger.location.info("Started location updates.")
     }
     
     /// Stops location updates
     func stopUpdates() {
         if !isRecording {
-            NSLog("Location updates not running.")
+            AppLogger.location.warning("No location updates running.")
             return
         }
         
         isRecording = false
         locationManager.stopUpdatingLocation()
+        AppLogger.location.info("Stopped location updates.")
         
         // Close FileHandle
         try? fileHandler?.close()
         fileHandler = nil
-        NSLog("Saved file to: \(currentFileURL?.path ?? "")")
-        NSLog("Stopped location updates.")
+        AppLogger.file.info("Saved location data to: \(self.currentFileURL?.path ?? "")")
     }
     
     // MARK: - CLLocationManagerDelegate
@@ -104,7 +105,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        NSLog("Location manager failed with error: \(error.localizedDescription)")
+        AppLogger.location.error("Location manager failed with error: \(error.localizedDescription)")
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -112,19 +113,19 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         switch manager.authorizationStatus {
         case .notDetermined:
-            NSLog("Location authorization: Not Determined")
+            AppLogger.location.debug("Location authorization: Not Determined")
         case .restricted:
-            NSLog("Location authorization: Restricted")
+            AppLogger.location.debug("Location authorization: Restricted")
             authorizationDenied = true
         case .denied:
-            NSLog("Location authorization: Denied")
+            AppLogger.location.debug("Location authorization: Denied")
             authorizationDenied = true
         case .authorizedAlways:
-            NSLog("Location authorization: Always")
+            AppLogger.location.debug("Location authorization: Always")
         case .authorizedWhenInUse:
-            NSLog("Location authorization: When In Use")
+            AppLogger.location.debug("Location authorization: When in use")
         @unknown default:
-            NSLog("Location authorization: Unknown")
+            AppLogger.location.debug("Location authorization: Unknown")
         }
     }
 }
