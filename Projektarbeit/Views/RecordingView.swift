@@ -9,11 +9,83 @@ import SwiftUI
 import os
 
 
+import SwiftUI
+import os
+
+struct RecordingView: View {
+    // NUR das ViewModel - kein direkter Manager-Zugriff!
+    @ObservedObject var viewModel = RecordingViewModel()
+    
+    var body: some View {
+        VStack {
+            // Camera Preview
+            ZStack {
+                // Zugriff auf Camera Session via ViewModel
+                if let session = viewModel.captureSession {
+                    CameraPreview(session: session)
+                } else {
+                    ProgressView("Kamera wird initialisiert …")
+                }
+            }
+            .onDisappear {
+                // Cleanup wenn View verschwindet
+                if viewModel.state == .recording {
+                    viewModel.stopRecording()
+                }
+            }
+
+            VStack(spacing: 20) {
+                // Timer Display (via ViewModel)
+                TimerView(timer: viewModel.recordingTimer)
+                    .padding()
+                
+                HStack {
+                    Button("Start", systemImage: "play.circle") {
+                        viewModel.startRecording()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding()
+                    .disabled(viewModel.state != .idle || !viewModel.isCameraReady)
+                    
+                    Button("Stop", systemImage: "stop.circle") {
+                        viewModel.stopRecording()
+                    }
+                    .buttonStyle(.bordered)
+                    .padding()
+                    .disabled(viewModel.state != .recording)
+                }
+                
+                // Optional: Show state
+                switch viewModel.state {
+                case .starting:
+                    ProgressView("Starting...")
+                case .stopping:
+                    ProgressView("Stopping...")
+                case .error(let message):
+                    Text(message)
+                        .foregroundColor(.red)
+                        .padding()
+                default:
+                    EmptyView()
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+#Preview {
+    RecordingView()
+}
+
+/*
 struct RecordingView: View {
     @EnvironmentObject var motionManager: MotionManager
     @EnvironmentObject var cameraManager: CameraManager
     @EnvironmentObject var locationManager: LocationManager
     @EnvironmentObject var recordingTimer: RecordingTimer
+    
+    @StateObject private var viewModel = RecordingViewModel()
     
     @State var currentSessionFolder: URL = URL.documentsDirectory
 
@@ -89,3 +161,4 @@ func createFolder() -> URL {
 #Preview {
     RecordingView()
 }
+*/

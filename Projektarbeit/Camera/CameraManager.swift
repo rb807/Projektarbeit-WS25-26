@@ -34,7 +34,11 @@ class CameraManager: NSObject, ObservableObject{
     }
     
     var captureSessionIfReady: AVCaptureSession? {
-        guard captureSession.isRunning else { return nil }
+        guard isRunning else {
+            AppLogger.camera.debug("Capture session not ready")
+            return nil
+        }
+        AppLogger.camera.debug("Capture session ready")
         return captureSession
     }
     
@@ -54,7 +58,7 @@ class CameraManager: NSObject, ObservableObject{
     func setUpCaptureSession() async -> Void {
         guard await isAuthorized else { return }
         guard !captureSession.isRunning else {
-            AppLogger.video.warning("Capture session is already running")
+            AppLogger.camera.warning("Capture session is already running")
             return
         }
         sessionQueue.async {
@@ -64,6 +68,7 @@ class CameraManager: NSObject, ObservableObject{
     }
     
     private func configureCaptureSession() -> Void {
+        AppLogger.camera.debug("Configuring capture session")
         self.captureSession.beginConfiguration()
         
         // Video
@@ -97,19 +102,23 @@ class CameraManager: NSObject, ObservableObject{
         
         self.captureSession.sessionPreset = .high
         self.captureSession.commitConfiguration()
+        AppLogger.camera.debug("Capture session configured.")
     }
     
     private func startCaptureSession() -> Void {
+        AppLogger.camera.info("Starting capture session")
         self.captureSession.startRunning()
-     
+        AppLogger.camera.info("Capture session started")
+        
         DispatchSerialQueue.main.async {
             self.isRunning = true
+            AppLogger.camera.info("isRunning set to true")
         }
     }
     
     func startRecording(path: URL) -> Void {
         if movieOutput.isRecording {
-            AppLogger.video.warning("Already recording.")
+            AppLogger.camera.warning("Already recording.")
             return
         }
         
@@ -132,19 +141,19 @@ class CameraManager: NSObject, ObservableObject{
         let outputUrl = path.appendingPathComponent(fileName)
         movieOutput.startRecording(to: outputUrl, recordingDelegate: self)
         
-        AppLogger.video.info("Started recording.")
+        AppLogger.camera.info("Started recording.")
     }
     
     func stopRecording() -> Void {
         if !movieOutput.isRecording {
-            AppLogger.video.info("Not recording.")
+            AppLogger.camera.info("Not recording.")
             return
         }
-        AppLogger.video.info("Stopping Video recording.")
+        AppLogger.camera.info("Stopping Video recording.")
         // Stop video
         movieOutput.stopRecording()
         
-        AppLogger.video.info("Stopped Video recording.")
+        AppLogger.camera.info("Stopped Video recording.")
     }
 }
 
@@ -164,7 +173,7 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
             frameTimestampFileHandle = nil
         }
         
-        AppLogger.video.debug("Total frames recorded: \(self.frameCount)")
+        AppLogger.camera.debug("Total frames recorded: \(self.frameCount)")
         AppLogger.file.debug("Video saved to \(outputFileURL.path)")
         
         // Used for debugging frame counting by calculating an
@@ -175,15 +184,15 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                 let duration = try await asset.load(.duration)
                 let durationSeconds = CMTimeGetSeconds(duration)
                 let expectedFrames = Int(durationSeconds * 30)
-                AppLogger.video.debug("Video duration: \(String(format: "%.2f", durationSeconds)) seconds")
-                AppLogger.video.debug("Expected frames @ 30 FPS: \(expectedFrames)")
+                AppLogger.camera.debug("Video duration: \(String(format: "%.2f", durationSeconds)) seconds")
+                AppLogger.camera.debug("Expected frames @ 30 FPS: \(expectedFrames)")
             } catch {
                 AppLogger.file.error("Failed to load video duration: \(error.localizedDescription)")
             }
         }
         
         if let error = error {
-            AppLogger.video.error("Recording failed. Error: \(error.localizedDescription)")
+            AppLogger.camera.error("Recording failed. Error: \(error.localizedDescription)")
         }
     }
 }

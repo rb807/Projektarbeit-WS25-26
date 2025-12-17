@@ -9,10 +9,15 @@ import OSLog
 
 struct AppLogger {
     
-    // Logger for recording
-    static let video = Logger(
+    // Logger for video
+    static let camera = Logger(
         subsystem: "com.projektarbeit.video",
-        category: "Video")
+        category: "Camera")
+    
+    // Logger for recording
+    static let recording = Logger(
+        subsystem: "com.projektarbeit",
+        category: "Recording")
     
     // Logger for IMU data collection
     static let imu = Logger(
