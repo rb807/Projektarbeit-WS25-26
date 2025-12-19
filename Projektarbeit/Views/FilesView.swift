@@ -93,6 +93,7 @@ struct FilesView: View {
         Button(action: {
             if !multiSelection.isEmpty {
                 filesViewModel.deleteFiles(urls: multiSelection)
+                multiSelection.removeAll()
             }
         }, label: {
             Image(systemName: "trash")
