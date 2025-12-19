@@ -6,82 +6,157 @@
 //
 
 import SwiftUI
+import os
 
 struct RecordingView: View {
-    @StateObject private var motionManager = MotionManager()
-    @StateObject private var cameraManager = CameraManager()
-    @StateObject private var locationManager = LocationManager()
-    @State var currentSessionFolder: URL = URL.documentsDirectory
-
+    @StateObject private var viewModel = RecordingViewModel()
+    @State private var showFilesView = false
+    
     var body: some View {
-        VStack {
-            ZStack {
-                if let session = cameraManager.captureSessionIfReady {
-                    CameraPreview(session: session)
-                } else {
-                    ProgressView("Kamera wird initialisiert …")
+        ZStack {
+            // Camera Preview
+            if let session = viewModel.captureSession {
+                CameraPreview(session: session)
+                    .ignoresSafeArea(.all)
+            } else {
+                Color.black
+                    .ignoresSafeArea(.all)
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.5)
+                    Text("Kamera wird initialisiert…")
+                        .foregroundColor(.white)
+                        .padding(.top, 20)
                 }
             }
-            .onAppear {
-                Task {
-                    await cameraManager.setUpCaptureSession()
-                }
-            }
-
-            VStack {
-                
-                SampleView(motionManager: motionManager, locationManager: locationManager)
-                
-                HStack {
-                    Button("Start", systemImage: "play.circle") {
-                        currentSessionFolder = createFolder()
+            
+            // UI Overlay
+            VStack(spacing: 0) {
+                // Top: Timer
+                if viewModel.state == .recording {
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 8, height: 8)
                         
-                        Task {
-                            await withTaskGroup(of: Void.self) { group in
-                                group.addTask { await motionManager.startMotionCapture(path: currentSessionFolder) }
-                                group.addTask { await cameraManager.startRecording(path: currentSessionFolder) }
-                                group.addTask { await locationManager.startUpdates(path: currentSessionFolder) }
-                            }
-                        }
+                        TimerView(timer: viewModel.recordingTimer)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .padding()
-                    .disabled(!cameraManager.isRunning)
-                    
-                    Button("Stop", systemImage: "stop.circle") {
-                        Task {
-                            await withTaskGroup(of: Void.self) { group in
-                                group.addTask { await motionManager.stopMotionCapture() }
-                                group.addTask { await cameraManager.stopRecording() }
-                                group.addTask { await locationManager.stopUpdates() }
-                            }
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .padding()
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(Color.black.opacity(0.6))
+                    )
+                    .padding(.top, 60)
+                    .transition(.scale.combined(with: .opacity))
                 }
+                
+                Spacer(minLength: 0)  // WICHTIG: minLength = 0
+                
+                // Bottom: Controls Row
+                BottomControls
             }
-            .padding()
+            .frame(maxHeight: .infinity)
+        }
+        .statusBarHidden(true)
+        .navigationBarHidden(true)
+        .navigationDestination(isPresented: $showFilesView) {
+            FilesView()
+                .navigationBarBackButtonHidden(false)
+        }
+        .onDisappear {
+            if viewModel.state == .recording {
+                viewModel.stopRecording()
+            }
+        }
+    }
+    
+    // MARK: - Bottom Controls
+    
+    private var BottomControls: some View {
+        HStack(spacing: 0) {  // spacing: 0, dann mit frame steuern
+            // Files button (left)
+            Button(action: {
+                showFilesView = true
+            }) {
+                Image(systemName: "folder.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.white)
+                    .frame(width: 50, height: 50)
+                    .background(
+                        Circle()
+                            .fill(Color.black.opacity(0.3))
+                    )
+            }
+            .disabled(viewModel.state == .recording)
+            .opacity(viewModel.state == .recording ? 0.3 : 1.0)
+            .frame(width: 70, height: 70)
+            .contentShape(Rectangle())
+            
+            Spacer()  // Between left and center
+            
+            // Recording button (center)
+            RecordingButton(
+                isRecording: viewModel.state == .recording,
+                isEnabled: isButtonEnabled,
+                action: toggleRecording
+            )
+            .frame(width: 100, height: 100)  
+            .contentShape(Rectangle())
+            
+            Spacer()  // Between center and right
+            
+            // Settings button (right)
+            Button(action: {
+                // Settings
+            }) {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.white)
+                    .frame(width: 50, height: 50)
+                    .background(
+                        Circle()
+                            .fill(Color.black.opacity(0.3))
+                    )
+            }
+            .disabled(viewModel.state == .recording)
+            .opacity(viewModel.state == .recording ? 0.3 : 1.0)
+            .frame(width: 70, height: 70)
+            .contentShape(Rectangle())
+        }
+        .frame(height: 120)
+        .padding(.horizontal, 30)
+        .padding(.bottom, 40)
+        .background(Color.clear)
+    }
+    
+    // MARK: - Logic
+    
+    private func toggleRecording() {
+        withAnimation {
+            if viewModel.state == .idle {
+                viewModel.startRecording()
+            } else if viewModel.state == .recording {
+                viewModel.stopRecording()
+            }
+        }
+    }
+    
+    private var isButtonEnabled: Bool {
+        switch viewModel.state {
+        case .idle:
+            return viewModel.isCameraReady
+        case .recording:
+            return true
+        case .starting, .stopping, .error:
+            return false
         }
     }
 }
 
-/// creates a folder for a recording in the documents directory
-func createFolder() -> URL {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-    let directory = formatter.string(from: Date())
-    let path = URL.documentsDirectory.appending(component: directory)
-    let manager = FileManager.default
-    do {
-        try manager.createDirectory(at: path, withIntermediateDirectories: true)
-    } catch {
-        NSLog("Could not create directory: \(error)")
-        return URL.documentsDirectory
-    }
-    return path
-}
-
 #Preview {
-    RecordingView()
+    NavigationStack {
+        RecordingView()
+    }
 }

@@ -6,22 +6,12 @@
 //
 
 import SwiftUI
-import CoreMotion
 
 struct ContentView: View {
     var body: some View {
-        TabView {
-            NavigationStack {
-                RecordingView()
-                    .navigationTitle("Datenerfassung")
-            }
-            .tabItem { Label("Datenerfassung", systemImage: "record.circle") }
-            
-            NavigationStack {
-                FilesListView()
-                    .navigationTitle("Aufnahmen")
-            }
-            .tabItem { Label("Aufnahmen", systemImage: "folder") }
+        NavigationStack {
+            RecordingView()
+                .navigationBarHidden(true)  // Hide navigation bar for fullscreen camera
         }
     }
 }

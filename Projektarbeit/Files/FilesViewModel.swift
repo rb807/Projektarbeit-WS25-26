@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 import UniformTypeIdentifiers
+import os
 
 class FilesViewModel: ObservableObject {
     @Published var files: [URL] = []
@@ -31,7 +32,7 @@ class FilesViewModel: ObservableObject {
             let content = try fm.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil)
             files = content
         } catch {
-            print("Error loading files: \(error)")
+            AppLogger.file.error("Failed to load files. Error: \(error)")
         }
     }
     
@@ -44,11 +45,11 @@ class FilesViewModel: ObservableObject {
         do {
             for url in urls {
                 try fm.removeItem(at: url)
-                print("File at \(url) deleted successfully")
+                AppLogger.file.debug("File at \(url) deleted successfully")
             }
             loadFiles() // Refresh the list
         } catch {
-            print("Error deleting file: \(error.localizedDescription)")
+            AppLogger.file.error("Failed to delete file. Error: \(error.localizedDescription)")
         }
     }
     
@@ -79,7 +80,7 @@ class FilesViewModel: ObservableObject {
             exportReady = true
             
         } catch {
-            print("Error preparing export: \(error)")
+            AppLogger.file.error("Failed to prepare export. Error: \(error)")
         }
         
         isPreparingExport = false

@@ -8,7 +8,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct FilesListView: View {
+struct FilesView: View {
     @ObservedObject var filesViewModel = FilesViewModel()
     @State private var multiSelection = Set<URL>()
     @State private var showExporter = false
@@ -93,6 +93,7 @@ struct FilesListView: View {
         Button(action: {
             if !multiSelection.isEmpty {
                 filesViewModel.deleteFiles(urls: multiSelection)
+                multiSelection.removeAll()
             }
         }, label: {
             Image(systemName: "trash")
@@ -142,5 +143,5 @@ struct FilesListView: View {
 }
 
 #Preview {
-    FilesListView()
+    FilesView()
 }

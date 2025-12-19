@@ -8,27 +8,27 @@
 import Foundation
 import CoreMotion
 import Combine
+import os
 
 /// Manages starting/stopping and storing of IMU-Data collection.
 class MotionManager: ObservableObject {
-    let motionManager = CMMotionManager() // Initializes the CMMotionManager which is used to start the various motion sensors
+    let motionManager = CMMotionManager()
     let queue = OperationQueue()
-    @Published var samples: Int = 0 // Simple indicator to check if anything is being measured
+    var samples: Int = 0
     
     private var fileHandler: FileHandle?
     private var currentFileURL: URL?
     
-    /// Checks if motion sensors are available and already running.
-    /// Sets up the CMMotionManager instance and then starts the collecting of motion data
+    // Dispatch for writing the samples to file 
+    private let fileWriteQueue = DispatchQueue(label: "com.app.imu.fileWrite", qos: .utility)
+    
     func startMotionCapture(path: URL) {
-        // Check if motion sensors are available
         if motionManager.isDeviceMotionAvailable == false {
-            print("Device motion is not available.")
+            AppLogger.imu.error("Device motion is not available.")
             return
         }
-        // Check if motion sensors are already active
         if motionManager.isDeviceMotionActive {
-            print("Device motion capture already active.")
+            AppLogger.imu.warning("Device motion is already active.")
             return
         }
         
@@ -37,44 +37,50 @@ class MotionManager: ObservableObject {
         currentFileURL = url
         samples = 0
 
-        // Create file and write csv table header
-        let header = "timestamp,yaw,pitch,roll,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z\n"
+        // Create file and write header
+        let header = "timestamp,yaw,pitch,roll,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,mag_x,mag_y,mag_z\n"
         try? header.write(to: url, atomically: true, encoding: .utf8)
         
         // Open FileHandle
         fileHandler = try? FileHandle(forWritingTo: url)
-        fileHandler?.seekToEndOfFile() // sets pointer to end of file
+        fileHandler?.seekToEndOfFile()
         
-        NSLog("Started motion capture")
-        self.motionManager.deviceMotionUpdateInterval = 1/30 // Defines how often the sensor data is updated (1/30 = 30hz)
+        AppLogger.imu.info("Started device motion updates")
+        self.motionManager.deviceMotionUpdateInterval = 0.03
         self.motionManager.showsDeviceMovementDisplay = true
         
-        self.motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: self.queue, withHandler: { (data, error) in
-            // unpack to check that data is not nil
+        self.motionManager.startDeviceMotionUpdates(using: .xMagneticNorthZVertical, to: self.queue) { (data, error) in
             if let validData = data {
-                // turn data into a string
-                let line = "\(validData.timestamp),\(validData.attitude.yaw),\(validData.attitude.pitch),\(validData.attitude.roll),\(validData.userAcceleration.x),\(validData.userAcceleration.y),\(validData.userAcceleration.z),\(validData.rotationRate.x),\(validData.rotationRate.y),\(validData.rotationRate.z)\n"
-                // Write data to file
-                if let fh = self.fileHandler, let data = line.data(using: .utf8) {
-                    fh.write(data)
-                }
-                // Update number of samples
-                DispatchQueue.main.async {
-                    self.samples = self.samples + 1
+                let magField = validData.magneticField.field
+                let line = "\(validData.timestamp),\(validData.attitude.yaw),\(validData.attitude.pitch),\(validData.attitude.roll),\(validData.userAcceleration.x),\(validData.userAcceleration.y),\(validData.userAcceleration.z),\(validData.rotationRate.x),\(validData.rotationRate.y),\(validData.rotationRate.z),\(magField.x),\(magField.y),\(magField.z)\n"
+                
+                // Write asyncronusly to queue as to not block event handler
+                self.fileWriteQueue.async {
+                    self.samples += 1
+                    if let fh = self.fileHandler, let data = line.data(using: .utf8) {
+                        fh.write(data)
+                    }
                 }
             }
-        })
+        }
     }
     
-    /// Stops the ongoing data collection if it is running.
-    func stopMotionCapture() -> Void {
+    func stopMotionCapture() {
         if motionManager.isDeviceMotionActive {
-            motionManager.stopDeviceMotionUpdates() // Stop new motion updates
-            try? fileHandler?.close() // Close the file handler
-            NSLog("Stopped device motion capture.")
-            NSLog("Saved file to: \(currentFileURL?.path ?? "")")
+            AppLogger.imu.info("Stopping device motion capture.")
+            motionManager.stopDeviceMotionUpdates()
+            
+            // Wait till all samples have been written to file
+            fileWriteQueue.sync {
+                try? fileHandler?.close()
+                fileHandler = nil
+            }
+            
+            AppLogger.imu.info("Device motion capture stopped.")
+            AppLogger.imu.debug("Nr. of samples: \(self.samples)")
+            AppLogger.file.debug("Saved IMU data to: \(self.currentFileURL?.path ?? "")")
         } else {
-            NSLog("Motion capture not active.")
+            AppLogger.imu.info("No need to stop device motion capture as it was not active.")
         }
     }
 }
