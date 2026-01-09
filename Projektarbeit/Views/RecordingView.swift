@@ -11,6 +11,7 @@ import os
 struct RecordingView: View {
     @StateObject private var viewModel = RecordingViewModel()
     @State private var showFilesView = false
+    @State private var showSettings = false
     
     var body: some View {
         ZStack {
@@ -52,9 +53,8 @@ struct RecordingView: View {
                     .transition(.scale.combined(with: .opacity))
                 }
                 
-                Spacer(minLength: 0)  // WICHTIG: minLength = 0
+                Spacer(minLength: 0)
                 
-                // Bottom: Controls Row
                 BottomControls
             }
             .frame(maxHeight: .infinity)
@@ -64,6 +64,10 @@ struct RecordingView: View {
         .navigationDestination(isPresented: $showFilesView) {
             FilesView()
                 .navigationBarBackButtonHidden(false)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsSheet(viewModel: viewModel)
+                .presentationDetents([.height(300)])  // Compact sheet
         }
         .onDisappear {
             if viewModel.state == .recording {
@@ -75,7 +79,7 @@ struct RecordingView: View {
     // MARK: - Bottom Controls
     
     private var BottomControls: some View {
-        HStack(spacing: 0) {  // spacing: 0, dann mit frame steuern
+        HStack(spacing: 0) {
             // Files button (left)
             Button(action: {
                 showFilesView = true
@@ -94,7 +98,7 @@ struct RecordingView: View {
             .frame(width: 70, height: 70)
             .contentShape(Rectangle())
             
-            Spacer()  // Between left and center
+            Spacer()
             
             // Recording button (center)
             RecordingButton(
@@ -102,14 +106,14 @@ struct RecordingView: View {
                 isEnabled: isButtonEnabled,
                 action: toggleRecording
             )
-            .frame(width: 100, height: 100)  
+            .frame(width: 100, height: 100)
             .contentShape(Rectangle())
             
-            Spacer()  // Between center and right
+            Spacer()
             
-            // Settings button (right)
+            // Settings button (right) - Opens Sheet
             Button(action: {
-                // Settings
+                showSettings = true
             }) {
                 Image(systemName: "gearshape.fill")
                     .font(.system(size: 28))
@@ -151,6 +155,45 @@ struct RecordingView: View {
             return true
         case .starting, .stopping, .error:
             return false
+        }
+    }
+}
+
+// MARK: - Settings Sheet (Compact)
+
+struct SettingsSheet: View {
+    @ObservedObject var viewModel: RecordingViewModel
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Toggle(isOn: $viewModel.recordCamera) {
+                        Label("Camera", systemImage: "camera.fill")
+                    }
+                    .tint(.blue)
+                    
+                    Toggle(isOn: $viewModel.recordImu) {
+                        Label("IMU", systemImage: "gyroscope")
+                    }
+                    .tint(.blue)
+                    
+                    Toggle(isOn: $viewModel.recordLocation) {
+                        Label("Location", systemImage: "location.fill")
+                    }
+                    .tint(.blue)
+                }
+            }
+            .navigationTitle("Einstellungen")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Fertig") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }

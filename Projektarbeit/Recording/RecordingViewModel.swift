@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import os
 import AVFoundation
+import UIKit
 
 enum RecordingState: Equatable {
     case idle
@@ -28,6 +29,10 @@ class RecordingViewModel: ObservableObject {
     
     private var currentSessionFolder: URL = URL.documentsDirectory
     private var cancellables = Set<AnyCancellable>()
+    
+    @Published var recordImu = true
+    @Published var recordCamera = true
+    @Published var recordLocation = true
     
     // MARK: - Initialization
     
@@ -86,6 +91,8 @@ class RecordingViewModel: ObservableObject {
             return
         }
         
+        UIApplication.shared.isIdleTimerDisabled = true
+        
         AppLogger.recording.info("Starting recording session")
         state = .starting
         
@@ -96,11 +103,26 @@ class RecordingViewModel: ObservableObject {
         recordingTimer.reset()
         recordingTimer.start()
         
-        // Start all managers
-        motionManager.startMotionCapture(path: currentSessionFolder)
-        cameraManager.startRecording(path: currentSessionFolder)
-        locationManager.startUpdates(path: currentSessionFolder)
-        
+        // Start managers
+        if recordImu {
+            motionManager.startMotionCapture(path: currentSessionFolder)
+            AppLogger.recording.info("IMU Recording: On")
+        } else {
+            AppLogger.recording.info("IMU Recording: Off")
+        }
+        if recordCamera {
+            cameraManager.startRecording(path: currentSessionFolder)
+            AppLogger.recording.info("Camera Recording: On")
+        } else {
+            AppLogger.recording.info("Camera Recording: Off")
+        }
+        if recordLocation {
+            locationManager.startUpdates(path: currentSessionFolder)
+            AppLogger.recording.info("Location Recording: On")
+        } else {
+            AppLogger.recording.info("Location Recording: Off")
+        }
+
         state = .recording
         AppLogger.recording.info("Recording started")
     }
@@ -111,6 +133,8 @@ class RecordingViewModel: ObservableObject {
             AppLogger.recording.warning("Cannot stop - not recording")
             return
         }
+        
+        UIApplication.shared.isIdleTimerDisabled = false
         
         AppLogger.recording.info("Stopping recording session")
         state = .stopping
@@ -125,6 +149,7 @@ class RecordingViewModel: ObservableObject {
         
         state = .idle
         AppLogger.recording.info("Recording stopped")
+        AppLogger.recording.debug("Recording duration: \(self.recordingTimer.timeString())")
     }
     
     // MARK: - Helper Functions
