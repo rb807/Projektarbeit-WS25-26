@@ -75,7 +75,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     /// Stops location updates
     func stopUpdates() {
         if !isRecording {
-            AppLogger.location.warning("No location updates running.")
+            AppLogger.location.info("No location updates running.")
             return
         }
         
