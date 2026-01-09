@@ -46,7 +46,7 @@ class MotionManager: ObservableObject {
         fileHandler?.seekToEndOfFile()
         
         AppLogger.imu.info("Started device motion updates")
-        self.motionManager.deviceMotionUpdateInterval = 0.03
+        self.motionManager.deviceMotionUpdateInterval = 0.01
         self.motionManager.showsDeviceMovementDisplay = true
         
         self.motionManager.startDeviceMotionUpdates(using: .xMagneticNorthZVertical, to: self.queue) { (data, error) in
