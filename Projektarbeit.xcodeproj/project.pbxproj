@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B2414EC32F0FB64000A385B5 /* KALIBR.md in Sources */ = {isa = PBXBuildFile; fileRef = B2414EC22F0FB62B00A385B5 /* KALIBR.md */; };
 		B252C5E52E9E2FAA00BA746D /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B252C5E02E9E2FAA00BA746D /* README.md */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B2414EC22F0FB62B00A385B5 /* KALIBR.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = KALIBR.md; sourceTree = "<group>"; };
 		B252C5E02E9E2FAA00BA746D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B2C244C92E99580000F771F8 /* Projektarbeit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Projektarbeit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2C244D62E99580100F771F8 /* ProjektarbeitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProjektarbeitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,6 +87,7 @@
 				B2C244E32E99580100F771F8 /* ProjektarbeitUITests */,
 				B2C244CA2E99580000F771F8 /* Products */,
 				B252C5E02E9E2FAA00BA746D /* README.md */,
+				B2414EC22F0FB62B00A385B5 /* KALIBR.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -243,6 +246,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2414EC32F0FB64000A385B5 /* KALIBR.md in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
