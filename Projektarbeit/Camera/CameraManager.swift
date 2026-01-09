@@ -7,6 +7,7 @@
 
 import Foundation
 import AVFoundation
+import ARKit
 import Combine
 import os
 
@@ -24,6 +25,10 @@ class CameraManager: NSObject, ObservableObject{
     private var isRecordingFrames = false
     private let fileWriteQueue = DispatchQueue(label: "com.app.frames.fileWrite", qos: .utility)
     private var frameCount: Int = 0
+    
+    // Store video device for intrinsics
+    private var videoDevice: AVCaptureDevice?
+    private var hasExportedIntrinsics = false
     
     override init() {
         super.init()
@@ -76,6 +81,8 @@ class CameraManager: NSObject, ObservableObject{
            let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
            self.captureSession.canAddInput(videoInput) {
             self.captureSession.addInput(videoInput)
+            // Store the video device for intrinsics
+            self.videoDevice = videoDevice
         }
         
         // Audio
@@ -122,6 +129,9 @@ class CameraManager: NSObject, ObservableObject{
             return
         }
         
+        // Export intrinsics at the start of recording
+        hasExportedIntrinsics = false
+        
         // Prepare frame timestamps file
         let timestampFileName = "frame_timestamps.csv"
         let timestampUrl = path.appendingPathComponent(timestampFileName)
@@ -149,7 +159,9 @@ class CameraManager: NSObject, ObservableObject{
             AppLogger.camera.info("Not recording.")
             return
         }
+        
         AppLogger.camera.info("Stopping Video recording.")
+        
         // Stop video
         movieOutput.stopRecording()
         
@@ -207,6 +219,20 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
         let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         let timestamp = CMTimeGetSeconds(presentationTime)
         
+        // Export intrinsics on first frame
+        if !hasExportedIntrinsics, let device = videoDevice {
+            if let outputFileURL = movieOutput.outputFileURL {
+                let folder = outputFileURL.deletingLastPathComponent()
+                
+                // Dispatch to background to avoid any delay
+                DispatchQueue.global(qos: .utility).async {
+                    self.exportCameraIntrinsics(from: device, to: folder)
+                }
+                
+                hasExportedIntrinsics = true
+            }
+        }
+        
         // Counts frames
         fileWriteQueue.async {
             self.frameCount += 1
@@ -220,6 +246,69 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
                     try? fh.synchronize()
                 }
             }
+        }
+    }
+}
+
+// Camera Intrinsics Extension
+extension CameraManager {
+    
+    /// Exports camera intrinsics from AVCaptureDevice
+    func exportCameraIntrinsics(from device: AVCaptureDevice, to folder: URL) {
+        // Get the active format
+        let format = device.activeFormat
+        
+        // Get intrinsic matrix from format description
+        let formatDescription = format.formatDescription
+        
+        // Get dimensions
+        let dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
+        let width = Int(dimensions.width)
+        let height = Int(dimensions.height)
+        
+        // For iOS devices, we need to estimate intrinsics based on field of view
+        // This is an approximation since AVCaptureDevice doesn't expose intrinsics directly
+        let fovRadians = device.activeFormat.videoFieldOfView * .pi / 180.0
+        let focalLengthPixels = Float(width) / (2.0 * tan(fovRadians / 2.0))
+        
+        let fx = focalLengthPixels
+        let fy = focalLengthPixels
+        let cx = Float(width) / 2.0
+        let cy = Float(height) / 2.0
+        
+        AppLogger.camera.debug("Camera Intrinsics from AVCaptureDevice:")
+        AppLogger.camera.debug("  fx: \(fx), fy: \(fy)")
+        AppLogger.camera.debug("  cx: \(cx), cy: \(cy)")
+        AppLogger.camera.debug("  Resolution: \(width)x\(height)")
+        AppLogger.camera.debug("  FOV: \(device.activeFormat.videoFieldOfView)°")
+        
+        // Create Kalibr YAML
+        let yaml = """
+        cam0:
+          camera_model: pinhole
+          intrinsics: [\(fx), \(fy), \(cx), \(cy)]
+          distortion_model: radtan
+          distortion_coeffs: [0.0, 0.0, 0.0, 0.0]
+          resolution: [\(width), \(height)]
+          rostopic: /cam0/image_raw
+          timeshift_cam_imu: 0.0
+        
+        # Camera intrinsics from AVCaptureDevice
+        # Note: These are estimated from field of view
+        # For more accurate intrinsics, consider using ARKit calibration
+        # Device: \(UIDevice.current.model)
+        # iOS: \(UIDevice.current.systemVersion)
+        # FOV: \(device.activeFormat.videoFieldOfView)°
+        # Exported: \(Date())
+        """
+        
+        let yamlURL = folder.appendingPathComponent("camera_intrinsics.yaml")
+        
+        do {
+            try yaml.write(to: yamlURL, atomically: true, encoding: .utf8)
+            AppLogger.camera.info("✅ Saved camera intrinsics: \(yamlURL.lastPathComponent)")
+        } catch {
+            AppLogger.camera.error("Failed to save intrinsics: \(error)")
         }
     }
 }
