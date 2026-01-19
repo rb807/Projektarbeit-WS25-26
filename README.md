@@ -29,11 +29,8 @@ Grundlage für Forschung und Entwicklung im Bereich Computer Vision und Robotik.
 - [X] Ansicht aller Aufnahmen innerhalb der App
 - [X] Exportieren der Files vom internen App File System in das File System des iPhones
 - [X] Zeitanzeige für die Aufnahme
-
-### Roadmap
-
-- [ ] Synchronität der Aufnahmen überprüfen mit kalibr
-- [ ] Extra File nach der Aufnahme mit Kamera informationen
+- [x] Synchronität der Aufnahmen überprüfen mit kalibr
+- [x] Yaml File mit Kamera Intrtinsics für kalibr
 
 --- 
 
